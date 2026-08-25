@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Example Blog</title>
+    <link>https://example.com/</link>
+    <description>A blog that exists for testing purposes.</description>
+    <item>
+      <title>A Post With Full Content</title>
+      <link>https://example.com/posts/full?utm_source=rss&amp;utm_medium=feed</link>
+      <guid isPermaLink="false">tag:example.com,2026:post-1</guid>
+      <description>A truncated summary that stops right about&#8230;</description>
+      <content:encoded><![CDATA[<p>The whole post, in all its glory.</p>]]></content:encoded>
+      <author>ada@example.com</author>
+      <pubDate>Mon, 03 Aug 2026 09:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>A Post Without A GUID</title>
+      <link>https://example.com/posts/no-guid</link>
+      <description>Only a summary here.</description>
+      <dc:creator>Grace Hopper</dc:creator>
+      <pubDate>Tue, 04 Aug 2026 12:30:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

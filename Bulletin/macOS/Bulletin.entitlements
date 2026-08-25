@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- Fetching feeds and article pages. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- Importing and exporting OPML. -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+
+	<!--
+	  Sparkle talks to its own installer over these two mach services. Without
+	  them a sandboxed app can download an update and then fail to install it.
+
+	  Temporary exceptions need no provisioning profile, so unlike the iCloud
+	  keys these are safe with the ad-hoc signing used for Debug builds.
+	-->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spks</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spki</string>
+	</array>
+
+	<!--
+	  iCloud sync is not on yet. Adding the two keys below without a registered
+	  container and a matching provisioning profile makes the app fail to
+	  launch, so they live in Docs/CLOUDKIT.md until that is set up:
+
+	    com.apple.developer.icloud-services
+	    com.apple.developer.icloud-container-identifiers
+	-->
+</dict>
+</plist>

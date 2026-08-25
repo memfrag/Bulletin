@@ -1,0 +1,3 @@
+This is just a plain text file. It is not a feed, it has never been a feed, and
+it has no intention of becoming a feed. It exists to be rejected, and it is long
+enough that no length-based short circuit can be what rejects it.

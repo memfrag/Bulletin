@@ -1,0 +1,19 @@
+# Build products
+build/
+DerivedData/
+*.xcarchive
+
+# Sparkle release tools, downloaded on demand by scripts/build-and-notarize.sh
+Sparkle-tools/
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# macOS
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
