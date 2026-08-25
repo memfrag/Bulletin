@@ -1,14 +1,21 @@
 {
   "fill" : {
-    "solid" : "gray:1.00000,1.00000"
+    "automatic-gradient" : "display-p3:0.21474,0.21947,0.22669,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
           "glass" : false,
-          "image-name" : "hammer-blueprint.png",
-          "name" : "hammer-blueprint"
+          "image-name" : "exec-e8d2a88e-e144-4541-a197-a968716b2448.png",
+          "name" : "exec-e8d2a88e-e144-4541-a197-a968716b2448",
+          "position" : {
+            "scale" : 0.62,
+            "translation-in-points" : [
+              -18.765625,
+              3.4453125
+            ]
+          }
         }
       ],
       "shadow" : {
