@@ -65,4 +65,17 @@ See [Docs/CLOUDKIT.md](Docs/CLOUDKIT.md).
 
 ## License
 
-See the LICENSE file for licensing information.
+Bulletin is released under the **BSD Zero Clause License** (0BSD) — see
+[LICENSE](LICENSE). It is a public-domain-equivalent licence: use it for anything,
+with or without attribution.
+
+The app bundles third-party code under its own terms, listed in the app's
+attributions window:
+
+| | |
+|---|---|
+| [Sparkle](https://github.com/sparkle-project/Sparkle) | MIT |
+| [FeedKit](https://github.com/nmdias/FeedKit) | MIT |
+| [SwiftSoup](https://github.com/scinfu/SwiftSoup) | MIT |
+| [Readability](https://github.com/mozilla/readability) | Apache 2.0 |
+| Apparata packages | 0BSD |
