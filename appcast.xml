@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Bulletin</title>
+        <item>
+            <title>1.0.0</title>
+            <pubDate>Tue, 25 Aug 2026 21:53:58 +0200</pubDate>
+            <sparkle:version>1.0.0</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/memfrag/Bulletin/releases/download/1.0.0/Bulletin-1.0.0.dmg" length="7351358" type="application/octet-stream" sparkle:edSignature="eNP1D0C5e3zqVATxweOSrS+d48pLNCk6pM6pBuAjsv/8DEGAcu3PQRLziQ33mWcLCm+G2F2sFEyE02mPaJ/FCg=="/>
+        </item>
+    </channel>
+</rss>
