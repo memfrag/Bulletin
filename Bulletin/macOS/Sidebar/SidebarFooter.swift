@@ -4,7 +4,11 @@
 
 import SwiftUI
 
-/// The result of the last refresh.
+/// Adding a feed, and the result of the last refresh.
+///
+/// The add button lives here rather than only in the empty state, because an
+/// affordance that disappears once you have one subscription is one you cannot
+/// use to get your second.
 ///
 /// Refreshing is manual, so the user is standing there having just asked for it
 /// and gets a receipt rather than having to wonder whether anything happened.
@@ -14,6 +18,15 @@ struct SidebarFooter: View {
 
     var body: some View {
         HStack(spacing: 6) {
+
+            Button {
+                library.isPresentingSubscribeSheet = true
+            } label: {
+                Image(systemName: "plus")
+            }
+            .buttonStyle(.accessoryBar)
+            .help(Text("Add a feed", comment: "Add feed button help"))
+
             if let syncStatus = library.syncMonitor.state.statusText {
                 // Working sync says nothing. This line only appears when there
                 // is something the user would want to know.

@@ -17,6 +17,10 @@ SCHEME="Bulletin (Release)"
 APP_NAME="Bulletin"
 BUNDLE_ID="pizza.martin.Bulletin"
 KEYCHAIN_PROFILE="notary"
+
+# Named in full: there is more than one "Developer ID Application" identity in
+# this keychain, and codesign refuses an ambiguous match.
+SIGNING_IDENTITY="Developer ID Application: Martin Johannesson (CQXRBQKG85)"
 SPARKLE_VERSION="2.9.0"
 GITHUB_REPO="memfrag/Bulletin"
 
@@ -185,6 +189,33 @@ step "Verifying the signature"
 codesign --verify --deep --strict --verbose=2 "$APP_PATH" 2>&1 | tail -5 \
     || error "The app is not correctly signed."
 
+# ------------------------------------------------------- notarizing the app
+
+# The app is notarized and stapled before the disk image is built, so that the
+# copy a user drags to /Applications carries its own ticket. Stapling only the
+# disk image leaves the app relying on an online check the first time it runs,
+# which fails for anyone who installs it and opens it offline.
+
+step "Notarizing the app (this takes a few minutes)"
+
+APP_ZIP="$BUILD_DIR/$APP_NAME-app.zip"
+ditto -c -k --keepParent "$APP_PATH" "$APP_ZIP" || error "Could not compress the app for notarization."
+
+xcrun notarytool submit "$APP_ZIP" \
+    --keychain-profile "$KEYCHAIN_PROFILE" \
+    --wait \
+    2>&1 | tee "$BUILD_DIR/notarize-app.log" | tail -10
+
+grep -q "status: Accepted" "$BUILD_DIR/notarize-app.log" || {
+    show_log_on_failure "$BUILD_DIR/notarize-app.log"
+    error "The app was not accepted for notarization. For the details:
+  xcrun notarytool log <submission-id> --keychain-profile $KEYCHAIN_PROFILE"
+}
+
+step "Stapling the app"
+xcrun stapler staple "$APP_PATH" || error "Could not staple the ticket to the app."
+xcrun stapler validate "$APP_PATH" || error "The app's stapled ticket does not validate."
+
 # ---------------------------------------------------------------------- dmg
 
 step "Building the disk image"
@@ -199,9 +230,17 @@ hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_STAGING" -ov -format UDZO "
     || error "Could not create the disk image."
 rm -rf "$DMG_STAGING"
 
-# --------------------------------------------------------------- notarizing
+step "Signing the disk image"
 
-step "Notarizing (this takes a few minutes)"
+# An unsigned disk image is assessed as "no usable signature" while it is still
+# quarantined, which is an avoidable warning on the way in.
+codesign --sign "$SIGNING_IDENTITY" --timestamp "$DMG_PATH" \
+    || error "Could not sign the disk image."
+codesign --verify --strict "$DMG_PATH" || error "The signed disk image does not verify."
+
+# ----------------------------------------------- notarizing the disk image
+
+step "Notarizing the disk image (this takes a few minutes)"
 
 xcrun notarytool submit "$DMG_PATH" \
     --keychain-profile "$KEYCHAIN_PROFILE" \
@@ -210,13 +249,31 @@ xcrun notarytool submit "$DMG_PATH" \
 
 grep -q "status: Accepted" "$BUILD_DIR/notarize.log" || {
     show_log_on_failure "$BUILD_DIR/notarize.log"
-    error "Notarization was not accepted. For the details:
+    error "The disk image was not accepted for notarization. For the details:
   xcrun notarytool log <submission-id> --keychain-profile $KEYCHAIN_PROFILE"
 }
 
-step "Stapling"
+step "Stapling the disk image"
 xcrun stapler staple "$DMG_PATH" || error "Could not staple the ticket to the disk image."
 xcrun stapler validate "$DMG_PATH" || error "The stapled ticket does not validate."
+
+step "Checking what a user will get"
+
+# Assess the app exactly as Gatekeeper will on first launch, from inside the
+# image that is about to be published.
+VERIFY_MOUNT="$BUILD_DIR/verify-mount"
+mkdir -p "$VERIFY_MOUNT"
+hdiutil attach -nobrowse -quiet "$DMG_PATH" -mountpoint "$VERIFY_MOUNT" \
+    || error "Could not mount the disk image for verification."
+
+ASSESSMENT="$(spctl -a -vv "$VERIFY_MOUNT/$APP_NAME.app" 2>&1 || true)"
+TICKET="$(xcrun stapler validate "$VERIFY_MOUNT/$APP_NAME.app" 2>&1 || true)"
+hdiutil detach "$VERIFY_MOUNT" -quiet || true
+
+echo "$ASSESSMENT"
+echo "$ASSESSMENT" | grep -q "accepted" || error "Gatekeeper does not accept the app in the disk image."
+echo "$ASSESSMENT" | grep -q "Notarized Developer ID" || error "The app is not recognised as notarized."
+echo "$TICKET" | grep -q "The validate action worked" || error "The app in the disk image has no stapled ticket."
 
 # ------------------------------------------------------------------ sparkle
 
