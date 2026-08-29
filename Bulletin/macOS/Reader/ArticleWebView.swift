@@ -50,21 +50,26 @@ struct ArticleWebView: NSViewRepresentable {
             self.onNavigate = onNavigate
         }
 
+        /// Decides what to do with a navigation.
+        ///
+        /// - Note: The `async` form of this delegate method rather than the
+        ///   completion-handler one. WebKit declares that handler as
+        ///   `@MainActor`, and a version without the annotation only *nearly*
+        ///   matches the protocol — so it is never called, and every link opens
+        ///   inside the reader instead of in the browser.
         func webView(
             _ webView: WKWebView,
-            decidePolicyFor navigationAction: WKNavigationAction,
-            decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
-        ) {
+            decidePolicyFor navigationAction: WKNavigationAction
+        ) async -> WKNavigationActionPolicy {
             // The initial `loadHTMLString` is the only navigation allowed.
             guard navigationAction.navigationType != .other else {
-                decisionHandler(.allow)
-                return
+                return .allow
             }
 
             if let url = navigationAction.request.url {
                 onNavigate(url)
             }
-            decisionHandler(.cancel)
+            return .cancel
         }
     }
 }

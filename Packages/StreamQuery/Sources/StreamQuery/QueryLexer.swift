@@ -33,7 +33,7 @@ enum QueryLexer {
     static func tokenize(_ input: String) -> [QueryToken] {
 
         var tokens: [QueryToken] = []
-        var characters = Array(input)
+        let characters = Array(input)
         var index = 0
 
         func skipWhitespace() {

@@ -188,7 +188,10 @@ struct SubscribeSheet: View {
         guard case .found(let feeds) = searchState else { return }
 
         for feed in feeds where selectedFeedURLs.contains(feed.url) {
-            try? library.subscribe(to: feed.url, title: feed.title ?? "")
+            // The new feed is not needed here; the sidebar picks it up from the
+            // store, and a failure is one feed not added rather than a reason
+            // to abandon the rest.
+            _ = try? library.subscribe(to: feed.url, title: feed.title ?? "")
         }
         dismiss()
 

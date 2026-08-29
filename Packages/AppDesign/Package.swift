@@ -11,6 +11,17 @@ let package = Package(
         .library(name: "AppDesign", targets: ["AppDesign"])
     ],
     targets: [
-        .target(name: "AppDesign", dependencies: [])
+        .target(
+            name: "AppDesign",
+            dependencies: [],
+            // Declared explicitly. Undeclared, SwiftPM warns that it does not
+            // know what these are and skips them, and the asset symbols the
+            // theme is built from never get generated.
+            resources: [
+                .process("All Platforms/Color/Color.xcassets"),
+                .process("All Platforms/Image/Icon/Icon.xcassets"),
+                .process("All Platforms/Image/Illustration/Illustration.xcassets")
+            ]
+        )
     ]
 )

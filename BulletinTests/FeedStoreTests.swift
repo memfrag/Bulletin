@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftData
+import Synchronization
 import Testing
 import FeedIngest
 @testable import Bulletin
@@ -130,10 +131,12 @@ struct FeedStoreTests {
         defer { TestURLProtocol.reset() }
 
         let url = feedURL
-        nonisolated(unsafe) var itemCount = 3
+        // The stub serves more items on the second refresh, so the count it
+        // reads has to be shared with the closure rather than captured.
+        let itemCount = Mutex(3)
         let session = TestURLProtocol.session { _ in
             (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!,
-             SampleFeed.rss(itemCount: itemCount))
+             SampleFeed.rss(itemCount: itemCount.withLock { $0 }))
         }
 
         let context = try TestStore.makeContext()
@@ -141,7 +144,7 @@ struct FeedStoreTests {
         try store.subscribe(to: url)
 
         _ = try await store.refreshAll()
-        itemCount = 5
+        itemCount.withLock { $0 = 5 }
         let second = try await store.refreshAll()
 
         #expect(second.newArticleCount == 2)
@@ -227,15 +230,18 @@ struct FeedStoreTests {
         defer { TestURLProtocol.reset() }
 
         let url = feedURL
-        nonisolated(unsafe) var status = 200
+        // Answers 200 first and 304 after, so the status is shared with the
+        // closure rather than captured and mutated behind its back.
+        let status = Mutex(200)
         let session = TestURLProtocol.session { _ in
+            let code = status.withLock { $0 }
             let response = HTTPURLResponse(
                 url: url,
-                statusCode: status,
+                statusCode: code,
                 httpVersion: nil,
-                headerFields: status == 200 ? ["ETag": "\"v1\""] : nil
+                headerFields: code == 200 ? ["ETag": "\"v1\""] : nil
             )!
-            return (response, status == 200 ? SampleFeed.rss(itemCount: 2) : Data())
+            return (response, code == 200 ? SampleFeed.rss(itemCount: 2) : Data())
         }
 
         let context = try TestStore.makeContext()
@@ -243,7 +249,7 @@ struct FeedStoreTests {
         try store.subscribe(to: url)
 
         _ = try await store.refreshAll()
-        status = 304
+        status.withLock { $0 = 304 }
         let second = try await store.refreshAll()
 
         #expect(second.unchangedFeedCount == 1)

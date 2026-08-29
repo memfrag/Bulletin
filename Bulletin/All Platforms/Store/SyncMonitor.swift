@@ -32,16 +32,25 @@ final class SyncMonitor {
 
     /// Held so the observation is removed with the monitor.
     ///
-    /// `nonisolated(unsafe)` because a nonisolated `deinit` cannot touch
-    /// main-actor state, and this is only ever written once during `init` on the
-    /// main actor and read once during teardown.
-    private nonisolated(unsafe) var observer: NSObjectProtocol?
+    /// Holds the observation token outside the actor.
+    ///
+    /// `deinit` is nonisolated and so cannot read main-actor state, and the
+    /// annotation that would have allowed it is not permitted on a mutable
+    /// stored property. A box that is itself `Sendable` sidesteps both: the
+    /// token is written once during `init` on the main actor and read once
+    /// during teardown, and never concurrently.
+    private nonisolated final class ObserverBox: @unchecked Sendable {
+        var token: NSObjectProtocol?
+    }
+
+    @ObservationIgnored
+    private let observerBox = ObserverBox()
 
     init(isEnabled: Bool) {
         state = isEnabled ? .idle(lastSuccess: nil) : .disabled
         guard isEnabled else { return }
 
-        observer = NotificationCenter.default.addObserver(
+        observerBox.token = NotificationCenter.default.addObserver(
             forName: NSPersistentCloudKitContainer.eventChangedNotification,
             object: nil,
             queue: .main
@@ -69,8 +78,8 @@ final class SyncMonitor {
     }
 
     deinit {
-        if let observer {
-            NotificationCenter.default.removeObserver(observer)
+        if let token = observerBox.token {
+            NotificationCenter.default.removeObserver(token)
         }
     }
 

@@ -19,6 +19,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0.3</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.news</string>
 	<key>NSServices</key>
 	<array>
 		<dict>
