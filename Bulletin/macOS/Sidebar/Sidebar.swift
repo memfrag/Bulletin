@@ -25,7 +25,10 @@ struct Sidebar: View {
     @Query(filter: #Predicate<Folder> { $0.parent == nil }, sort: \Folder.sortIndex)
     private var rootFolders: [Folder]
 
-    @Query(filter: #Predicate<Feed> { $0.folder == nil }, sort: \Feed.title)
+    /// Sorted in the view rather than in the query: the store can only order by
+    /// the stored `title`, but what the sidebar shows is `displayTitle`, which
+    /// prefers a name the user has given the feed.
+    @Query(filter: #Predicate<Feed> { $0.folder == nil })
     private var rootFeeds: [Feed]
 
     private var deletionTitle: String {
@@ -77,7 +80,7 @@ struct Sidebar: View {
                         ForEach(rootFolders) { folder in
                             FolderRow(folder: folder, counts: counts)
                         }
-                        ForEach(rootFeeds) { feed in
+                        ForEach(rootFeeds.sortedByTitle) { feed in
                             FeedRow(feed: feed, unreadCount: counts[feed.id])
                         }
                     }
@@ -154,7 +157,7 @@ private struct FolderRow: View {
             ForEach((folder.children ?? []).sorted { $0.sortIndex < $1.sortIndex }) { child in
                 FolderRow(folder: child, counts: counts)
             }
-            ForEach((folder.feeds ?? []).sorted { $0.displayTitle < $1.displayTitle }) { feed in
+            ForEach((folder.feeds ?? []).sortedByTitle) { feed in
                 FeedRow(feed: feed, unreadCount: counts[feed.id])
             }
         } label: {
@@ -236,5 +239,20 @@ private struct NoSubscriptionsRow: View {
         }
         .padding(.vertical, 4)
         .selectionDisabled()
+    }
+}
+
+// MARK: - Sorting
+
+extension Array where Element == Feed {
+
+    /// Feeds in the order a person would look for them.
+    ///
+    /// `localizedStandardCompare` is what Finder uses: case-insensitive, so
+    /// `iOS Dev Weekly` sits between `Fatbobman's` and `Matt` rather than after
+    /// every capitalised name, and numerically aware, so `Issue 9` precedes
+    /// `Issue 10`.
+    var sortedByTitle: [Feed] {
+        sorted { $0.displayTitle.localizedStandardCompare($1.displayTitle) == .orderedAscending }
     }
 }
