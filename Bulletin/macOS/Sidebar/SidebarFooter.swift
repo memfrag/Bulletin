@@ -19,13 +19,25 @@ struct SidebarFooter: View {
     var body: some View {
         HStack(spacing: 6) {
 
-            Button {
-                library.isPresentingSubscribeSheet = true
+            Menu {
+                Button {
+                    library.isPresentingSubscribeSheet = true
+                } label: {
+                    Text("Add Feed…", comment: "Subscribe to a feed")
+                }
+
+                Button {
+                    library.createFolder(named: "")
+                } label: {
+                    Text("New Folder", comment: "Create a folder")
+                }
             } label: {
                 Image(systemName: "plus")
             }
-            .buttonStyle(.accessoryBar)
-            .help(Text("Add a feed", comment: "Add feed button help"))
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help(Text("Add a feed or folder", comment: "Add button help"))
 
             if let syncStatus = library.syncMonitor.state.statusText {
                 // Working sync says nothing. This line only appears when there

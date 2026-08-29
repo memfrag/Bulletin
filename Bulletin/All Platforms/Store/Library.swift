@@ -628,6 +628,98 @@ final class Library {
 
     // MARK: - Private
 
+    // MARK: - Folders
+
+    /// Creates a folder, optionally inside another.
+    @discardableResult
+    func createFolder(named name: String, parent: Folder? = nil) -> Folder {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let folder = Folder(
+            name: trimmed.isEmpty ? String(localized: "New Folder") : trimmed,
+            parent: parent
+        )
+        folder.sortIndex = (try? modelContext.fetchCount(FetchDescriptor<Folder>())) ?? 0
+        modelContext.insert(folder)
+        save()
+        return folder
+    }
+
+    func renameFolder(_ folder: Folder, to name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        folder.name = trimmed
+        // The folder's name is a search facet, so every article beneath it has
+        // a stale `folder_path` until they are reindexed.
+        reindexArticles(under: folder)
+        save()
+    }
+
+    /// Deletes a folder. Its feeds move up rather than being deleted with it.
+    ///
+    /// Losing a subscription because a folder was tidied away would be a nasty
+    /// surprise; the relationship's nullify rule is what makes this safe.
+    func deleteFolder(_ folder: Folder) {
+        let orphanedFeeds = folder.feedsIncludingDescendants
+
+        if selectedItem == .folder(folder.id) {
+            selectedItem = .builtInStream(.unread)
+        }
+
+        for feed in orphanedFeeds {
+            feed.folder = nil
+        }
+
+        modelContext.delete(folder)
+        save()
+
+        indexer?.index(orphanedFeeds.flatMap { $0.articles ?? [] })
+        runQuery()
+    }
+
+    /// Moves a feed into a folder, or to the top level when `folder` is nil.
+    func move(_ feed: Feed, to folder: Folder?) {
+        guard feed.folder?.id != folder?.id else { return }
+        feed.folder = folder
+        // `folder_path` is what `folder:` matches on, so the feed's articles
+        // have to be reindexed or the query keeps the old answer.
+        indexer?.index(feed.articles ?? [])
+        save()
+        runQuery()
+    }
+
+    /// Moves a folder inside another, or to the top level.
+    ///
+    /// - Returns: Whether the move was allowed. Dropping a folder into its own
+    ///   descendant would detach the whole branch from the tree.
+    @discardableResult
+    func move(_ folder: Folder, into newParent: Folder?) -> Bool {
+        guard folder.id != newParent?.id else { return false }
+        guard !isDescendant(newParent, of: folder) else { return false }
+
+        folder.parent = newParent
+        reindexArticles(under: folder)
+        save()
+        runQuery()
+        return true
+    }
+
+    /// Whether `candidate` sits anywhere beneath `folder`.
+    func isDescendant(_ candidate: Folder?, of folder: Folder) -> Bool {
+        var node = candidate
+        var guardCount = 0
+        while let current = node, guardCount < 64 {
+            if current.id == folder.id { return true }
+            node = current.parent
+            guardCount += 1
+        }
+        return false
+    }
+
+    private func reindexArticles(under folder: Folder) {
+        let articles = folder.feedsIncludingDescendants.flatMap { $0.articles ?? [] }
+        indexer?.index(articles)
+    }
+
     // MARK: - Tags
 
     /// Every tag in use, alphabetically.

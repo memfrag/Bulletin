@@ -71,7 +71,7 @@ struct Sidebar: View {
                     }
                 }
 
-                Section(header: Text("Subscriptions", comment: "Sidebar section of feeds and folders")) {
+                Section(header: SubscriptionsHeader()) {
                     if rootFolders.isEmpty && rootFeeds.isEmpty {
                         NoSubscriptionsRow(
                             isPresentingSubscribeSheet: $library.isPresentingSubscribeSheet
@@ -141,6 +141,44 @@ struct Sidebar: View {
     }
 }
 
+// MARK: - Subscriptions Header
+
+/// The section header, which doubles as the drop target for "out of any folder".
+///
+/// Dragging to the top level needs somewhere to aim at, and the header is the
+/// only fixed piece of the section — the rows beneath it move around.
+private struct SubscriptionsHeader: View {
+
+    @Environment(Library.self) private var library
+
+    @State private var isTargeted = false
+
+    var body: some View {
+        Text("Subscriptions", comment: "Sidebar section of feeds and folders")
+            .padding(.vertical, 2)
+            .padding(.horizontal, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(isTargeted ? Color.accentColor.opacity(0.25) : .clear)
+            )
+            .dropDestination(for: FeedReference.self) { references, _ in
+                let feeds = references.compactMap { library.feed(withID: $0.feedID) }
+                guard !feeds.isEmpty else { return false }
+                for feed in feeds {
+                    library.move(feed, to: nil)
+                }
+                return true
+            } isTargeted: { isTargeted = $0 }
+            .dropDestination(for: FolderReference.self) { references, _ in
+                let folders = references.compactMap { library.folder(withID: $0.folderID) }
+                guard !folders.isEmpty else { return false }
+                return folders.reduce(false) { moved, folder in
+                    library.move(folder, into: nil) || moved
+                }
+            } isTargeted: { isTargeted = $0 }
+    }
+}
+
 // MARK: - Folder Row
 
 /// A folder and everything under it.
@@ -149,8 +187,14 @@ struct Sidebar: View {
 /// it on import would quietly rearrange everyone's subscription list.
 private struct FolderRow: View {
 
+    @Environment(Library.self) private var library
+
     let folder: Folder
     let counts: UnreadCounts
+
+    @State private var isTargeted = false
+    @State private var isRenaming = false
+    @State private var draftName = ""
 
     var body: some View {
         DisclosureGroup {
@@ -162,10 +206,77 @@ private struct FolderRow: View {
             }
         } label: {
             NavigationLink(value: SidebarItem.folder(folder.id)) {
-                Label(folder.name, systemImage: "folder")
+                Label(folder.name, systemImage: isTargeted ? "folder.fill" : "folder")
                     .badge(counts.count(for: folder))
             }
+            .draggable(FolderReference(folderID: folder.id))
+            .dropDestination(for: FeedReference.self) { references, _ in
+                move(references)
+            } isTargeted: { isTargeted = $0 }
+            .dropDestination(for: FolderReference.self) { references, _ in
+                moveFolders(references)
+            } isTargeted: { isTargeted = $0 }
+            .contextMenu {
+                Button {
+                    draftName = folder.name
+                    isRenaming = true
+                } label: {
+                    Text("Rename…", comment: "Folder action")
+                }
+
+                Button {
+                    library.createFolder(named: "", parent: folder)
+                } label: {
+                    Text("New Folder Inside", comment: "Folder action")
+                }
+
+                Divider()
+
+                Button(role: .destructive) {
+                    library.deleteFolder(folder)
+                } label: {
+                    Text("Delete", comment: "Folder action")
+                }
+            }
+            .alert(
+                Text("Rename Folder", comment: "Rename folder dialog title"),
+                isPresented: $isRenaming
+            ) {
+                TextField(text: $draftName) {
+                    Text("Name", comment: "Folder name field")
+                }
+                Button {
+                    library.renameFolder(folder, to: draftName)
+                } label: {
+                    Text("Rename", comment: "Confirm renaming a folder")
+                }
+                Button(role: .cancel) {} label: {
+                    Text("Cancel", comment: "Dismiss the dialog")
+                }
+            }
         }
+    }
+
+    /// Nests dropped folders inside this one.
+    ///
+    /// Refuses a drop into the folder's own descendant, which would detach the
+    /// whole branch from the tree.
+    private func moveFolders(_ references: [FolderReference]) -> Bool {
+        let folders = references.compactMap { library.folder(withID: $0.folderID) }
+        guard !folders.isEmpty else { return false }
+        return folders.reduce(false) { moved, dragged in
+            library.move(dragged, into: folder) || moved
+        }
+    }
+
+    /// Moves dropped feeds into this folder.
+    private func move(_ references: [FeedReference]) -> Bool {
+        let feeds = references.compactMap { library.feed(withID: $0.feedID) }
+        guard !feeds.isEmpty else { return false }
+        for feed in feeds {
+            library.move(feed, to: folder)
+        }
+        return true
     }
 }
 
@@ -196,10 +307,20 @@ private struct FeedRow: View {
             .badge(unreadCount)
             .help(feed.lastFailureMessage ?? feed.displayTitle)
         }
+        .draggable(FeedReference(feedID: feed.id))
         .contextMenu {
             if let url = feed.homePageURL {
                 Link(destination: url) {
                     Text("Open Website", comment: "Feed action")
+                }
+                Divider()
+            }
+
+            if feed.folder != nil {
+                Button {
+                    library.move(feed, to: nil)
+                } label: {
+                    Text("Move Out of Folder", comment: "Feed action")
                 }
                 Divider()
             }

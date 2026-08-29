@@ -179,6 +179,20 @@ private struct KeyboardHelp: View {
                 come back.
                 """)
 
+            HelpSubheading("Folders")
+
+            HelpParagraph("""
+                Group subscriptions by making a folder from the + button under the sidebar, then \
+                dragging feeds onto it. Drag a feed back onto the Subscriptions heading to take it \
+                out again, and drag folders into each other to nest them.
+                """)
+
+            HelpParagraph("""
+                A folder shows the unread count for everything inside it, and folder:Name in a query \
+                matches its contents including anything nested deeper. Deleting a folder keeps its \
+                feeds and moves them back to the top level.
+                """)
+
             HelpSubheading("Refreshing")
 
             HelpParagraph("""

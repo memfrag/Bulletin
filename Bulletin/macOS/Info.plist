@@ -44,5 +44,32 @@
 	<string>https://raw.githubusercontent.com/memfrag/Bulletin/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Bulletin Feed</string>
+			<key>UTTypeIdentifier</key>
+			<string>pizza.martin.Bulletin.feed-reference</string>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Bulletin Folder</string>
+			<key>UTTypeIdentifier</key>
+			<string>pizza.martin.Bulletin.folder-reference</string>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
+		</dict>
+	</array>
 </dict>
 </plist>
