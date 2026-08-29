@@ -3,6 +3,15 @@
     <channel>
         <title>Bulletin</title>
         <item>
+            <title>1.0.2</title>
+            <pubDate>Sat, 29 Aug 2026 18:49:20 +0200</pubDate>
+            <sparkle:version>1.0.2</sparkle:version>
+            <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/memfrag/Bulletin/releases/download/1.0.2/Bulletin-1.0.2.dmg" length="7375537" type="application/octet-stream" sparkle:edSignature="hqwiu02d6Dln6ctuawS1lEqAKk9G8cZ7FNfNDx9BH0RBuaR+05Qshr/Ln194/zi/YVHb7aWJtBJN/SgLZENPDQ=="/>
+        </item>
+        <item>
             <title>1.0.1</title>
             <pubDate>Tue, 25 Aug 2026 22:24:34 +0200</pubDate>
             <sparkle:version>1.0.1</sparkle:version>
