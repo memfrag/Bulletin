@@ -136,10 +136,34 @@ public enum QueryField: String, Equatable, Sendable, Hashable, CaseIterable {
 public enum QueryFlag: String, Equatable, Sendable, Hashable, CaseIterable {
     case unread
     case read
-    case starred
-    case unstarred
+    case bookmarked
+    case unbookmarked
     /// Has a note attached.
     case annotated
+}
+
+extension QueryFlag {
+
+    /// Older spellings that still parse.
+    ///
+    /// Bookmarking used to be called starring. Saved streams written then say
+    /// `starred`, and dropping the word would break them silently — the query
+    /// would still parse, just as a text search for a word no article contains.
+    private static let aliases: [String: QueryFlag] = [
+        "starred": .bookmarked,
+        "unstarred": .unbookmarked
+    ]
+
+    /// Reads a bare keyword, canonical spelling or alias.
+    ///
+    /// - Important: The serializer decides whether a *search term* needs
+    ///   quoting by asking this the same question. Both must agree, or
+    ///   searching for the word `starred` would come back as the bookmarked
+    ///   filter.
+    public static func parse(_ word: String) -> QueryFlag? {
+        let lowered = word.lowercased()
+        return QueryFlag(rawValue: lowered) ?? aliases[lowered]
+    }
 }
 
 public enum DateBound: String, Equatable, Sendable, Hashable, CaseIterable {

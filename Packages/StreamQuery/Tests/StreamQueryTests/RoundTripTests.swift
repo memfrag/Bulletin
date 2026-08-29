@@ -54,6 +54,31 @@ struct RoundTripTests {
         #expect(first == second)
     }
 
+    @Test("The older spelling still parses as the filter",
+          arguments: [
+            ("starred", QueryFlag.bookmarked),
+            ("unstarred", QueryFlag.unbookmarked),
+            ("STARRED", QueryFlag.bookmarked)
+          ])
+    func aliasesStillParse(text: String, expected: QueryFlag) {
+        // Saved streams written before bookmarking was renamed say `starred`.
+        // Dropping the word would break them silently: the query would still
+        // parse, just as a text search for a word no article contains.
+        #expect(QueryParser.parse(text) == .clause(.flag(expected)))
+    }
+
+    @Test("Searching for the old word is still a search, not the filter")
+    func aliasesAreQuotedAsText() {
+        let searchForTheWord = QueryExpression.clause(.text("starred"))
+        let text = QuerySerializer.string(from: searchForTheWord)
+
+        // The serializer and the parser have to agree about which bare words
+        // are keywords, aliases included, or this round trip turns a search
+        // into a filter.
+        #expect(text == "\"starred\"")
+        #expect(QueryParser.parse(text) == searchForTheWord)
+    }
+
     @Test("An empty query matches everything")
     func emptyQuery() {
         #expect(QueryParser.parse("") == .always)

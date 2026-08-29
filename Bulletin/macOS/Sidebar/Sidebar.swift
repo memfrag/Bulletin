@@ -130,9 +130,9 @@ struct Sidebar: View {
             }
         } message: { feed in
             // Say what is actually lost. "Are you sure?" tells nobody anything,
-            // and starred articles going with the feed is the part that stings.
+            // and bookmarked articles going with the feed is the part that stings.
             Text(
-                "Its \(feed.articles?.count ?? 0) articles will be deleted too, including any you have starred. This cannot be undone.",
+                "Its \(feed.articles?.count ?? 0) articles will be deleted too, including any you have bookmarked. This cannot be undone.",
                 comment: "Feed deletion confirmation detail"
             )
         }

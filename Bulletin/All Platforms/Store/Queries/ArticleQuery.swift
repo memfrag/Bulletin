@@ -69,9 +69,9 @@ enum ArticleQuery {
                 article.status?.isRead == false || retained.contains(article.id)
             }
 
-        case .builtInStream(.starred):
+        case .builtInStream(.bookmarked):
             return #Predicate { article in
-                article.status?.isStarred == true || retained.contains(article.id)
+                article.status?.isBookmarked == true || retained.contains(article.id)
             }
 
         case .builtInStream(.today):

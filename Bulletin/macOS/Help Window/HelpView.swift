@@ -82,8 +82,8 @@ private struct QueryHelp: View {
             HelpTable(rows: [
                 ("unread", "Not yet read"),
                 ("read", "Already read"),
-                ("starred", "Starred"),
-                ("unstarred", "Not starred"),
+                ("bookmarked", "Bookmarked"),
+                ("unbookmarked", "Not bookmarked"),
                 ("annotated", "Has a note")
             ])
 
@@ -114,16 +114,21 @@ private struct QueryHelp: View {
             HelpSubheading("Combining")
 
             HelpTable(rows: [
-                ("unread starred", "Both — conditions side by side mean “and”"),
-                ("unread OR starred", "Either"),
+                ("unread bookmarked", "Both — conditions side by side mean “and”"),
+                ("unread OR bookmarked", "Either"),
                 ("-tag:noise", "Not — a leading minus negates"),
-                ("(unread OR starred) title:swift", "Parentheses group"),
+                ("(unread OR bookmarked) title:swift", "Parentheses group"),
                 ("\"exact phrase\"", "Quoted text is searched as written")
             ])
 
             HelpParagraph("""
                 Words on their own search the article’s title and text. Quoting matters: unread is the \
                 condition, while "unread" searches for the word.
+                """)
+
+            HelpParagraph("""
+                Bookmarking used to be called starring, so starred and unstarred still work in a query \
+                and mean the same as bookmarked and unbookmarked.
                 """)
         }
     }
@@ -149,7 +154,7 @@ private struct KeyboardHelp: View {
                 ("↑ ↓", "Move through articles"),
                 ("Tab / ⇧Tab", "Move between the three columns"),
                 ("Return", "Open in your browser"),
-                ("S", "Star or unstar"),
+                ("S", "Bookmark or remove the bookmark"),
                 ("U", "Mark read or unread"),
                 ("T", "Tags"),
                 ("N", "Note"),

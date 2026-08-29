@@ -180,8 +180,8 @@ struct QueryRowEditor: View {
         switch flag {
         case .unread: String(localized: "is unread")
         case .read: String(localized: "is read")
-        case .starred: String(localized: "is starred")
-        case .unstarred: String(localized: "is not starred")
+        case .bookmarked: String(localized: "is bookmarked")
+        case .unbookmarked: String(localized: "is not bookmarked")
         case .annotated: String(localized: "has a note")
         }
     }

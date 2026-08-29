@@ -23,9 +23,14 @@ final class ArticleStatus {
 
     var readAt: Date?
 
-    var isStarred: Bool = false
+    /// - Note: `originalName` because this was called `isStarred` before
+    ///   bookmarking was renamed. Without it SwiftData would treat this as a
+    ///   new attribute and every existing bookmark would quietly vanish.
+    @Attribute(originalName: "isStarred")
+    var isBookmarked: Bool = false
 
-    var starredAt: Date?
+    @Attribute(originalName: "starredAt")
+    var bookmarkedAt: Date?
 
     /// A free-text note on the whole article.
     ///

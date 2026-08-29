@@ -115,7 +115,7 @@ struct BulletinCommands: Commands {
                 .keyboardShortcut("t", modifiers: [.command, .shift])
             } else {
                 Button {} label: {
-                    Text("Star", comment: "Article action")
+                    Text("Bookmark", comment: "Article action")
                 }
                 .disabled(true)
             }

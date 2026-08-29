@@ -82,7 +82,7 @@ struct CoalescedWriteTests {
         let library = Library(modelContext: context, indexURL: nil)
 
         library.setRead(true, on: articles[0])
-        library.toggleStarred(articles[1])
+        library.toggleBookmarked(articles[1])
         library.flushPendingWrites()
 
         #expect(!library.hasPendingWrites)

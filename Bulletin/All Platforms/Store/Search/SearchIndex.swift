@@ -25,8 +25,9 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
 final class SearchIndex {
 
     /// Bump when the schema changes. A mismatch rebuilds rather than migrates,
-    /// which is the whole advantage of the index being derived.
-    private static let schemaVersion = 1
+    /// which is the whole advantage of the index being derived — version 2
+    /// renamed `is_starred` to `is_bookmarked` and cost nothing to adopt.
+    private static let schemaVersion = 2
 
     private var database: OpaquePointer?
 
@@ -89,7 +90,7 @@ final class SearchIndex {
               canonical_url TEXT NOT NULL DEFAULT '',
               sort_date     REAL NOT NULL DEFAULT 0,
               is_read       INTEGER NOT NULL DEFAULT 0,
-              is_starred    INTEGER NOT NULL DEFAULT 0,
+              is_bookmarked INTEGER NOT NULL DEFAULT 0,
               has_note      INTEGER NOT NULL DEFAULT 0,
               tags          TEXT NOT NULL DEFAULT ''
             )
@@ -130,7 +131,7 @@ final class SearchIndex {
             let article = try prepare("""
                 INSERT OR REPLACE INTO articles
                   (id, feed_id, feed_title, folder_path, title, author, url,
-                   canonical_url, sort_date, is_read, is_starred, has_note, tags)
+                   canonical_url, sort_date, is_read, is_bookmarked, has_note, tags)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """)
             let deleteText = try prepare("DELETE FROM articles_fts WHERE id = ?")
@@ -154,7 +155,7 @@ final class SearchIndex {
                 bind(article, 8, record.canonicalURL)
                 sqlite3_bind_double(article, 9, record.sortDate.timeIntervalSince1970)
                 sqlite3_bind_int(article, 10, record.isRead ? 1 : 0)
-                sqlite3_bind_int(article, 11, record.isStarred ? 1 : 0)
+                sqlite3_bind_int(article, 11, record.isBookmarked ? 1 : 0)
                 sqlite3_bind_int(article, 12, record.hasNote ? 1 : 0)
                 bind(article, 13, record.tags)
                 guard sqlite3_step(article) == SQLITE_DONE else {

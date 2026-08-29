@@ -27,7 +27,7 @@ struct SearchIndexTests {
         author: String = "",
         daysAgo: Int = 0,
         isRead: Bool = false,
-        isStarred: Bool = false,
+        isBookmarked: Bool = false,
         hasNote: Bool = false,
         tags: [String] = [],
         canonicalURL: String = "",
@@ -44,7 +44,7 @@ struct SearchIndexTests {
             canonicalURL: canonicalURL,
             sortDate: Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!,
             isRead: isRead,
-            isStarred: isStarred,
+            isBookmarked: isBookmarked,
             hasNote: hasNote,
             tags: tags.isEmpty ? "" : "|" + tags.joined(separator: "|") + "|",
             body: body
@@ -63,11 +63,11 @@ struct SearchIndexTests {
         let index = try makeIndex()
         let unread = record("Unread One")
         let read = record("Read One", isRead: true)
-        let starred = record("Starred One", isRead: true, isStarred: true)
+        let starred = record("Bookmarked One", isRead: true, isBookmarked: true)
         try index.upsert([unread, read, starred])
 
         #expect(try ids(index, "unread") == [unread.id])
-        #expect(try ids(index, "starred") == [starred.id])
+        #expect(try ids(index, "bookmarked") == [starred.id])
         #expect(try Set(ids(index, "read")) == Set([read.id, starred.id]))
     }
 
@@ -175,12 +175,12 @@ struct SearchIndexTests {
     func queriesBooleans() throws {
         let index = try makeIndex()
         let unread = record("Unread")
-        let starred = record("Starred", isRead: true, isStarred: true)
+        let starred = record("Starred", isRead: true, isBookmarked: true)
         let neither = record("Neither", isRead: true)
         try index.upsert([unread, starred, neither])
 
-        #expect(try Set(ids(index, "unread OR starred")) == Set([unread.id, starred.id]))
-        #expect(try ids(index, "read -starred") == [neither.id])
+        #expect(try Set(ids(index, "unread OR bookmarked")) == Set([unread.id, starred.id]))
+        #expect(try ids(index, "read -bookmarked") == [neither.id])
     }
 
     // MARK: - Maintenance

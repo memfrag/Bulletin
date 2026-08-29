@@ -305,7 +305,7 @@ struct StreamRetentionTests {
         library.selectedItem = .builtInStream(.unread)
         library.setRead(true, on: articles[1])
 
-        library.selectedItem = .builtInStream(.starred)
+        library.selectedItem = .builtInStream(.bookmarked)
         library.selectedItem = .builtInStream(.unread)
 
         #expect(library.retainedArticleIDs.isEmpty)

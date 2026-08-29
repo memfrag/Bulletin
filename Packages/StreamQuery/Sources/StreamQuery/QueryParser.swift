@@ -67,7 +67,7 @@ public enum QueryParser {
 
         case .word(let word):
             tokens = tokens.dropFirst()
-            if let flag = QueryFlag(rawValue: word.lowercased()) {
+            if let flag = QueryFlag.parse(word) {
                 return .clause(.flag(flag))
             }
             return .clause(.text(word))

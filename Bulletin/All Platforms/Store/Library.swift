@@ -251,7 +251,7 @@ final class Library {
 
     /// The feed the user has asked to delete, pending confirmation.
     ///
-    /// Deleting a feed takes its articles with it, including starred ones, and
+    /// Deleting a feed takes its articles with it, including bookmarked ones, and
     /// nothing here is recoverable — so it is confirmed rather than undoable.
     var feedPendingDeletion: Feed?
 
@@ -344,10 +344,10 @@ final class Library {
         }
     }
 
-    func toggleStarred(_ article: Article) {
+    func toggleBookmarked(_ article: Article) {
         let status = status(for: article)
-        status.isStarred.toggle()
-        status.starredAt = status.isStarred ? Date() : nil
+        status.isBookmarked.toggle()
+        status.bookmarkedAt = status.isBookmarked ? Date() : nil
         retain(article)
         save()
         scheduleReindex(of: article)

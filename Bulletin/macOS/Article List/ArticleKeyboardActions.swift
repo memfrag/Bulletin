@@ -28,7 +28,7 @@ private struct ArticleKeyboardActions: ViewModifier {
             }
             .onKeyPress(keys: ["s"]) { _ in
                 guard let article = selectedArticle else { return .ignored }
-                library.toggleStarred(article)
+                library.toggleBookmarked(article)
                 return .handled
             }
             .onKeyPress(keys: ["u"]) { _ in

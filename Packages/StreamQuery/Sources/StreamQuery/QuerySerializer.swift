@@ -105,7 +105,7 @@ public enum QuerySerializer {
             || value.contains("\\")
             || value.hasPrefix("-")
             || ["or", "and", "not"].contains(value.lowercased())
-            || QueryFlag(rawValue: value.lowercased()) != nil
+            || QueryFlag.parse(value) != nil
 
         guard needsQuoting else { return value }
 

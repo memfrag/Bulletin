@@ -14,13 +14,13 @@ enum BuiltInStream: String, CaseIterable {
 
     case unread
     case today
-    case starred
+    case bookmarked
 
     var title: String {
         switch self {
         case .unread: String(localized: "Unread")
         case .today: String(localized: "Today")
-        case .starred: String(localized: "Starred")
+        case .bookmarked: String(localized: "Bookmarked")
         }
     }
 
@@ -28,7 +28,7 @@ enum BuiltInStream: String, CaseIterable {
         switch self {
         case .unread: "circle.inset.filled"
         case .today: "sun.horizon"
-        case .starred: "star"
+        case .bookmarked: "bookmark"
         }
     }
 }

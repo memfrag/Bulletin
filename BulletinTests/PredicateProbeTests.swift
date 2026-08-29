@@ -28,7 +28,7 @@ struct PredicateProbeTests {
             article.publishedAt = Date(timeIntervalSince1970: TimeInterval(1_000_000 + index))
             let status = ArticleStatus(article: article)
             status.isRead = (index == 0)
-            status.isStarred = (index == 2)
+            status.isBookmarked = (index == 2)
             context.insert(article)
             context.insert(status)
             article.status = status
@@ -86,7 +86,7 @@ struct PredicateProbeTests {
         let starred = try context.fetch(
             FetchDescriptor<Article>(
                 predicate: #Predicate { article in
-                    article.status?.isStarred == true
+                    article.status?.isBookmarked == true
                 }
             )
         )

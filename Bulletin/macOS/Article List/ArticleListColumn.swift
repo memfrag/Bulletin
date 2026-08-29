@@ -136,11 +136,11 @@ private struct ArticleList: View {
                 } description: {
                     Text("Nothing left unread.", comment: "Unread stream empty state")
                 }
-            case .builtInStream(.starred):
+            case .builtInStream(.bookmarked):
                 ContentUnavailableView {
-                    Label("Nothing Starred", systemImage: "star")
+                    Label("Nothing Bookmarked", systemImage: "bookmark")
                 } description: {
-                    Text("Star an article to keep it here.", comment: "Starred stream empty state")
+                    Text("Bookmark an article to keep it here.", comment: "Bookmarked stream empty state")
                 }
             case .stream:
                 ContentUnavailableView {

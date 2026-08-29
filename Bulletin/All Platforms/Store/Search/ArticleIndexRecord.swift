@@ -22,7 +22,7 @@ struct ArticleIndexRecord: Sendable, Equatable {
     /// Published date, falling back to ingest time — feeds lie about dates.
     var sortDate: Date
     var isRead: Bool
-    var isStarred: Bool
+    var isBookmarked: Bool
     var hasNote: Bool
     /// Delimited, `|swift|ios|`, so `tag:dev` cannot match `devops`.
     var tags: String
@@ -47,7 +47,7 @@ extension ArticleIndexRecord {
             canonicalURL: article.canonicalURL?.absoluteString ?? "",
             sortDate: article.sortDate,
             isRead: article.status?.isRead ?? false,
-            isStarred: article.status?.isStarred ?? false,
+            isBookmarked: article.status?.isBookmarked ?? false,
             hasNote: article.status?.note != nil,
             tags: tagNames.isEmpty ? "" : "|" + tagNames.joined(separator: "|") + "|",
             body: body.isEmpty ? (article.summary ?? "") : body

@@ -89,8 +89,8 @@ public struct QuerySQLCompiler: Sendable {
             switch flag {
             case .unread: return "is_read = 0"
             case .read: return "is_read = 1"
-            case .starred: return "is_starred = 1"
-            case .unstarred: return "is_starred = 0"
+            case .bookmarked: return "is_bookmarked = 1"
+            case .unbookmarked: return "is_bookmarked = 0"
             case .annotated: return "has_note = 1"
             }
 

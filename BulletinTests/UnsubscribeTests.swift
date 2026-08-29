@@ -28,7 +28,7 @@ struct UnsubscribeTests {
             let article = Article(guid: "g\(index)", feed: feed, title: "Article \(index)")
             article.url = URL(string: "https://example.com/\(index)")
             let status = ArticleStatus(article: article)
-            status.isStarred = true
+            status.isBookmarked = true
             context.insert(article)
             context.insert(status)
             article.status = status

@@ -68,15 +68,15 @@ private struct ArticleReader: View {
                     }
 
                     Button {
-                        library.toggleStarred(article)
+                        library.toggleBookmarked(article)
                     } label: {
                         Label {
-                            Text("Star", comment: "Toolbar action")
+                            Text("Bookmark", comment: "Toolbar action")
                         } icon: {
-                            Image(systemName: (article.status?.isStarred ?? false) ? "star.fill" : "star")
+                            Image(systemName: (article.status?.isBookmarked ?? false) ? "bookmark.fill" : "bookmark")
                         }
                     }
-                    .help(Text("Star", comment: "Toolbar help"))
+                    .help(Text("Bookmark", comment: "Toolbar help"))
 
                     Button {
                         library.toggleRead(article)

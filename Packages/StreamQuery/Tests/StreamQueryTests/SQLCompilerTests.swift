@@ -16,7 +16,7 @@ struct SQLCompilerTests {
     @Test("Flags compile to column comparisons")
     func compilesFlags() {
         #expect(compiler.compile(QueryParser.parse("unread")).whereClause == "is_read = 0")
-        #expect(compiler.compile(QueryParser.parse("starred")).whereClause == "is_starred = 1")
+        #expect(compiler.compile(QueryParser.parse("bookmarked")).whereClause == "is_bookmarked = 1")
         #expect(compiler.compile(QueryParser.parse("annotated")).whereClause == "has_note = 1")
     }
 
@@ -24,17 +24,17 @@ struct SQLCompilerTests {
     func compilesBooleans() {
         // Relying on SQL's own precedence here would be a bug waiting for the
         // first query that mixes the two.
-        let compiled = compiler.compile(QueryParser.parse("unread OR starred"))
-        #expect(compiled.whereClause == "(is_read = 0 OR is_starred = 1)")
+        let compiled = compiler.compile(QueryParser.parse("unread OR bookmarked"))
+        #expect(compiled.whereClause == "(is_read = 0 OR is_bookmarked = 1)")
 
-        let mixed = compiler.compile(QueryParser.parse("(unread OR starred) read"))
-        #expect(mixed.whereClause == "((is_read = 0 OR is_starred = 1) AND is_read = 1)")
+        let mixed = compiler.compile(QueryParser.parse("(unread OR bookmarked) read"))
+        #expect(mixed.whereClause == "((is_read = 0 OR is_bookmarked = 1) AND is_read = 1)")
     }
 
     @Test("Negation wraps its whole subtree")
     func compilesNegation() {
-        let compiled = compiler.compile(QueryParser.parse("-(unread starred)"))
-        #expect(compiled.whereClause == "NOT ((is_read = 0 AND is_starred = 1))")
+        let compiled = compiler.compile(QueryParser.parse("-(unread bookmarked)"))
+        #expect(compiled.whereClause == "NOT ((is_read = 0 AND is_bookmarked = 1))")
     }
 
     @Test("Values are bound, never interpolated")

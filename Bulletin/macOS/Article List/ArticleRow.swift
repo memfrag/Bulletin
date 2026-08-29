@@ -18,7 +18,7 @@ struct ArticleRow: View {
     var alsoInFeedCount: Int = 0
 
     private var isRead: Bool { article.status?.isRead ?? false }
-    private var isStarred: Bool { article.status?.isStarred ?? false }
+    private var isBookmarked: Bool { article.status?.isBookmarked ?? false }
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -43,8 +43,8 @@ struct ArticleRow: View {
                         Text(verbatim: "·")
                     }
                     Text(article.sortDate, format: .relative(presentation: .named))
-                    if isStarred {
-                        Image(systemName: "star.fill")
+                    if isBookmarked {
+                        Image(systemName: "bookmark.fill")
                             .foregroundStyle(.yellow)
                     }
                     if article.status?.note != nil {
@@ -97,11 +97,11 @@ struct ArticleActions: View {
         }
 
         Button {
-            library.toggleStarred(article)
+            library.toggleBookmarked(article)
         } label: {
-            (article.status?.isStarred ?? false)
-                ? Text("Remove Star", comment: "Article action")
-                : Text("Star", comment: "Article action")
+            (article.status?.isBookmarked ?? false)
+                ? Text("Remove Bookmark", comment: "Article action")
+                : Text("Bookmark", comment: "Article action")
         }
 
         Button {
