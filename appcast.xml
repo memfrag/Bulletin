@@ -3,6 +3,15 @@
     <channel>
         <title>Bulletin</title>
         <item>
+            <title>1.0.5</title>
+            <pubDate>Sat, 29 Aug 2026 20:56:24 +0200</pubDate>
+            <sparkle:version>1.0.5</sparkle:version>
+            <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/memfrag/Bulletin/releases/download/1.0.5/Bulletin-1.0.5.dmg" length="7405771" type="application/octet-stream" sparkle:edSignature="uPG4HwCOMiOqZ6UA6rkGvxVo2E67/CefTF4vpsYK58f5R5oUHOL/4At6sTjy/OmP2Dy0/pbY7lM/FSdk7d/WCA=="/>
+        </item>
+        <item>
             <title>1.0.4</title>
             <pubDate>Sat, 29 Aug 2026 20:43:01 +0200</pubDate>
             <sparkle:version>1.0.4</sparkle:version>
@@ -19,15 +28,6 @@
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/memfrag/Bulletin/releases/download/1.0.3/Bulletin-1.0.3.dmg" length="7405255" type="application/octet-stream" sparkle:edSignature="J6RtsIMiD9l+8yVXtYhgwMSeSc56M/foch8hC32T7G7lZVbEwDWWy955a06/IyZIoNsj6bV9A1J4c13iqDO0CA=="/>
-        </item>
-        <item>
-            <title>1.0.2</title>
-            <pubDate>Sat, 29 Aug 2026 18:49:20 +0200</pubDate>
-            <sparkle:version>1.0.2</sparkle:version>
-            <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/memfrag/Bulletin/releases/download/1.0.2/Bulletin-1.0.2.dmg" length="7375537" type="application/octet-stream" sparkle:edSignature="hqwiu02d6Dln6ctuawS1lEqAKk9G8cZ7FNfNDx9BH0RBuaR+05Qshr/Ln194/zi/YVHb7aWJtBJN/SgLZENPDQ=="/>
         </item>
     </channel>
 </rss>
