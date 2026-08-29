@@ -37,7 +37,8 @@ private struct ArticleKeyboardActions: ViewModifier {
                 return .handled
             }
             .onKeyPress(keys: ["r"]) { _ in
-                Task { await library.refreshAll() }
+                // Asking explicitly overrides a failing feed's backoff window.
+                Task { await library.refreshAll(force: true) }
                 return .handled
             }
             .onKeyPress(keys: ["t"]) { _ in

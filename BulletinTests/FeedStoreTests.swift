@@ -57,6 +57,51 @@ struct FeedStoreTests {
         #expect(feed.homePageURL == URL(string: "https://example.com/"))
     }
 
+    @Test("A title guessed at subscribe time is replaced by the feed's own")
+    func refreshCorrectsGuessedTitle() async throws {
+        defer { TestURLProtocol.reset() }
+
+        let url = feedURL
+        let session = TestURLProtocol.session { _ in
+            (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+             SampleFeed.rss(itemCount: 1))
+        }
+
+        let context = try TestStore.makeContext()
+        let store = FeedStore(modelContext: context, fetcher: FeedFetcher(session: session))
+
+        // What discovery hands over for a WordPress site: the boilerplate from
+        // a `<link rel="alternate" title="...">` attribute.
+        try store.subscribe(to: url, title: "Example » Feed")
+        _ = try await store.refreshAll()
+
+        let feed = try #require(try store.feed(withURL: url))
+        #expect(feed.title == "Example Blog")
+        #expect(feed.displayTitle == "Example Blog")
+    }
+
+    @Test("A title the user set themselves survives refreshing")
+    func refreshKeepsCustomTitle() async throws {
+        defer { TestURLProtocol.reset() }
+
+        let url = feedURL
+        let session = TestURLProtocol.session { _ in
+            (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+             SampleFeed.rss(itemCount: 1))
+        }
+
+        let context = try TestStore.makeContext()
+        let store = FeedStore(modelContext: context, fetcher: FeedFetcher(session: session))
+        let feed = try store.subscribe(to: url)
+        feed.customTitle = "My Name For It"
+
+        _ = try await store.refreshAll()
+
+        // Trusting the feed's own title must not stomp on a rename.
+        #expect(feed.displayTitle == "My Name For It")
+        #expect(feed.title == "Example Blog")
+    }
+
     @Test("Refreshing the same feed twice does not duplicate articles")
     func ingestDedupsByGUID() async throws {
         defer { TestURLProtocol.reset() }

@@ -128,7 +128,14 @@ final class FeedStore {
     /// stops an edited post from arriving twice.
     private func ingest(_ parsed: ParsedFeed, into feed: Feed) -> Int {
 
-        if feed.title.isEmpty, !parsed.title.isEmpty {
+        // The feed's own title always wins. Until the first fetch, `title` may
+        // hold a guess taken from a page's `<link rel="alternate" title="...">`
+        // — which for WordPress sites is boilerplate like "SwiftLee » Feed".
+        // Only filling this in when empty left that guess in place forever.
+        //
+        // A `customTitle` the user set is separate and is what `displayTitle`
+        // prefers, so renaming a feed still sticks.
+        if !parsed.title.isEmpty, feed.title != parsed.title {
             feed.title = parsed.title
         }
         if feed.homePageURL == nil {

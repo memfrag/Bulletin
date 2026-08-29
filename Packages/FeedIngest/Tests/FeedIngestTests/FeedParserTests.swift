@@ -148,3 +148,77 @@ struct FeedParserTests {
         #expect(feed.items.last?.author == nil)
     }
 }
+
+// MARK: - Character references
+
+@Suite("HTML entities")
+struct HTMLEntityTests {
+
+    @Test("Named references are decoded",
+          arguments: [
+            ("SwiftLee &raquo; Feed", "SwiftLee » Feed"),
+            ("Tom &amp; Jerry", "Tom & Jerry"),
+            ("She said &ldquo;no&rdquo;", "She said \u{201C}no\u{201D}"),
+            ("Wait&hellip; what?", "Wait… what?"),
+            ("A &mdash; B", "A — B"),
+            ("&copy; 2026", "© 2026")
+          ])
+    func decodesNamed(input: String, expected: String) {
+        // The first case is the one that shipped: a feed title lifted from a
+        // WordPress `<link rel="alternate" title="...">` attribute.
+        #expect(HTMLEntities.decode(input) == expected)
+    }
+
+    @Test("Numeric references are decoded, decimal and hexadecimal",
+          arguments: [
+            ("It&#8217;s here", "It\u{2019}s here"),
+            ("It&#x2019;s here", "It\u{2019}s here"),
+            ("&#65;&#66;&#67;", "ABC")
+          ])
+    func decodesNumeric(input: String, expected: String) {
+        #expect(HTMLEntities.decode(input) == expected)
+    }
+
+    @Test("Text with no references is returned unchanged",
+          arguments: ["Daring Fireball", "", "100% of the time", "a & b"])
+    func leavesPlainTextAlone(input: String) {
+        // A bare ampersand is not a reference and must survive.
+        #expect(HTMLEntities.decode(input) == input)
+    }
+
+    @Test("An unknown reference is left visible rather than dropped")
+    func preservesUnknownReferences() {
+        // Deleting it would silently change the title; leaving it makes the gap
+        // obvious if one ever matters.
+        #expect(HTMLEntities.decode("A &notareal; B") == "A &notareal; B")
+    }
+
+    @Test("An unterminated reference does not eat the rest of the string")
+    func handlesUnterminatedReference() {
+        #expect(HTMLEntities.decode("Q&A without a semicolon") == "Q&A without a semicolon")
+        #expect(HTMLEntities.decode("trailing &") == "trailing &")
+    }
+
+    @Test("Feed and item titles are decoded when parsed")
+    func decodesParsedTitles() throws {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+          <title>SwiftLee &amp;raquo; Feed</title>
+          <link>https://example.com/</link>
+          <item>
+            <title>It&amp;#8217;s a title</title>
+            <link>https://example.com/one</link>
+            <author>Antoine &amp;amp; Co</author>
+          </item>
+        </channel></rss>
+        """
+        let feed = try FeedParser.parse(Data(xml.utf8))
+
+        // The XML parser resolves &amp; to &, leaving the HTML reference behind
+        // for this pass to finish.
+        #expect(feed.title == "SwiftLee » Feed")
+        #expect(feed.items.first?.title == "It\u{2019}s a title")
+        #expect(feed.items.first?.author == "Antoine & Co")
+    }
+}

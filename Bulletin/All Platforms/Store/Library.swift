@@ -118,6 +118,13 @@ final class Library {
 
     private(set) var lastRefresh: RefreshSummary?
 
+    /// When a refresh was last *started*.
+    ///
+    /// Recorded at the start rather than the end so that the launch refresh and
+    /// an activation arriving at the same moment cannot both decide the feeds
+    /// are stale and fetch everything twice.
+    private(set) var lastRefreshAttemptAt: Date?
+
     // MARK: Setup
 
     private let modelContext: ModelContext
@@ -195,6 +202,7 @@ final class Library {
     func refreshAll(force: Bool = false) async {
         guard !isRefreshing else { return }
         isRefreshing = true
+        lastRefreshAttemptAt = Date()
         defer { isRefreshing = false }
 
         do {
@@ -209,6 +217,16 @@ final class Library {
             // than as feeds having failed.
             lastRefresh = RefreshSummary()
         }
+    }
+
+    /// Refreshes if the feeds have gone stale, per the user's setting.
+    ///
+    /// Called when the app is activated. Coming back to Bulletin after a while
+    /// is the one moment an automatic fetch is clearly wanted, and the only one
+    /// available without a polling timer.
+    func refreshIfStale(olderThan settings: AppSettings) async {
+        guard settings.shouldRefresh(lastAttempt: lastRefreshAttemptAt) else { return }
+        await refreshAll()
     }
 
     // MARK: - Subscribing
@@ -231,9 +249,53 @@ final class Library {
         try store.exportOPML()
     }
 
-    func unsubscribe(_ feed: Feed) throws {
+    /// The feed the user has asked to delete, pending confirmation.
+    ///
+    /// Deleting a feed takes its articles with it, including starred ones, and
+    /// nothing here is recoverable — so it is confirmed rather than undoable.
+    var feedPendingDeletion: Feed?
+
+    /// Unsubscribes, and removes everything the feed brought with it.
+    ///
+    /// SwiftData's cascade reaches the articles and their status. It does not
+    /// reach the things keyed by id rather than by relationship: the extracted
+    /// bodies in the local store, this machine's fetch bookkeeping, and the
+    /// search index — which would otherwise go on returning articles that no
+    /// longer exist.
+    func unsubscribe(_ feed: Feed) {
+        let feedID = feed.id
+        let articleIDs = (feed.articles ?? []).map(\.id)
+
+        indexer?.remove(ids: articleIDs)
+
+        for articleID in articleIDs {
+            let descriptor = FetchDescriptor<ArticleBody>(
+                predicate: #Predicate { $0.articleID == articleID }
+            )
+            for body in (try? modelContext.fetch(descriptor)) ?? [] {
+                modelContext.delete(body)
+            }
+        }
+
+        let stateDescriptor = FetchDescriptor<FeedFetchState>(
+            predicate: #Predicate { $0.feedID == feedID }
+        )
+        for state in (try? modelContext.fetch(stateDescriptor)) ?? [] {
+            modelContext.delete(state)
+        }
+
+        // Leaving the selection pointing at a feed that no longer exists shows
+        // an empty list with the deleted feed's name still in the title.
+        if selectedItem == .feed(feedID) || selectedItem == .folder(feed.folder?.id ?? UUID()) {
+            selectedItem = .builtInStream(.unread)
+        }
+        selectedArticleID = nil
+
         modelContext.delete(feed)
-        try modelContext.save()
+        save()
+
+        pruneUnusedTags()
+        runQuery()
     }
 
     // MARK: - Reading state

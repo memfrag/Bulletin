@@ -139,13 +139,11 @@ public enum FeedDiscovery {
 
 private extension String {
 
-    /// Decodes the handful of entities that actually turn up in `href`s.
+    /// Decodes the character references in an attribute value.
+    ///
+    /// A `title` attribute is HTML, not XML, so it carries the full range —
+    /// WordPress writes site feeds as `Name &raquo; Feed`.
     var decodingBasicHTMLEntities: String {
-        replacingOccurrences(of: "&amp;", with: "&")
-            .replacingOccurrences(of: "&lt;", with: "<")
-            .replacingOccurrences(of: "&gt;", with: ">")
-            .replacingOccurrences(of: "&quot;", with: "\"")
-            .replacingOccurrences(of: "&#39;", with: "'")
-            .replacingOccurrences(of: "&apos;", with: "'")
+        HTMLEntities.decode(self)
     }
 }

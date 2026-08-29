@@ -38,7 +38,12 @@ final class ArticleIndexer {
     }
 
     func remove(_ articles: [Article]) {
-        try? index.remove(ids: articles.map(\.id))
+        remove(ids: articles.map(\.id))
+    }
+
+    /// Removes rows by id, for articles that have already been deleted.
+    func remove(ids: [UUID]) {
+        try? index.remove(ids: ids)
     }
 
     /// Rebuilds the whole index from the store.

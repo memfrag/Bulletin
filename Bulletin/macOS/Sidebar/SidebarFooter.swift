@@ -52,7 +52,8 @@ struct SidebarFooter: View {
             Spacer(minLength: 0)
 
             Button {
-                Task { await library.refreshAll() }
+                // Asking explicitly overrides a failing feed's backoff window.
+                Task { await library.refreshAll(force: true) }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }

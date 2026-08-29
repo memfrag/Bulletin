@@ -61,8 +61,8 @@ public enum FeedParser {
                     ?? link?.nilIfEmpty
                     ?? item.title?.trimmed
                     ?? "",
-                title: item.title?.trimmed ?? "",
-                author: (item.author ?? item.dublinCore?.creator)?.trimmed.nilIfEmpty,
+                title: item.title?.asPlainText ?? "",
+                author: (item.author ?? item.dublinCore?.creator)?.asPlainText.nilIfEmpty,
                 url: url(link),
                 // `content:encoded` carries the full post when the publisher is
                 // generous; `<description>` is usually the truncated summary.
@@ -73,7 +73,7 @@ public enum FeedParser {
 
         return ParsedFeed(
             format: .rss,
-            title: channel?.title?.trimmed ?? "",
+            title: channel?.title?.asPlainText ?? "",
             homePageURL: url(channel?.link),
             items: items
         )
@@ -87,8 +87,8 @@ public enum FeedParser {
             let link = alternateLink(in: entry.links)
             return ParsedFeedItem(
                 guid: entry.id?.trimmed.nilIfEmpty ?? link ?? entry.title?.trimmed ?? "",
-                title: entry.title?.trimmed ?? "",
-                author: entry.authors?.first?.name?.trimmed.nilIfEmpty,
+                title: entry.title?.asPlainText ?? "",
+                author: entry.authors?.first?.name?.asPlainText.nilIfEmpty,
                 url: url(link),
                 contentHTML: entry.content?.text?.nilIfEmpty ?? entry.summary?.text?.nilIfEmpty,
                 // Atom's `published` is optional and `updated` is not, so a feed
@@ -99,7 +99,7 @@ public enum FeedParser {
 
         return ParsedFeed(
             format: .atom,
-            title: feed.title?.text?.trimmed ?? "",
+            title: feed.title?.text?.asPlainText ?? "",
             homePageURL: url(alternateLink(in: feed.links)),
             items: items
         )
@@ -133,8 +133,8 @@ public enum FeedParser {
                 ?? item.summary?.nilIfEmpty
             return ParsedFeedItem(
                 guid: identifier,
-                title: item.title?.trimmed ?? "",
-                author: authorName?.trimmed.nilIfEmpty,
+                title: item.title?.asPlainText ?? "",
+                author: authorName?.asPlainText.nilIfEmpty,
                 url: url(itemURL),
                 contentHTML: content,
                 publishedAt: item.datePublished ?? item.dateModified
@@ -143,7 +143,7 @@ public enum FeedParser {
 
         return ParsedFeed(
             format: .json,
-            title: feed.title?.trimmed ?? "",
+            title: feed.title?.asPlainText ?? "",
             homePageURL: url(feed.homePageURL),
             items: items
         )
@@ -165,6 +165,14 @@ private extension FeedParser {
 }
 
 private extension String {
+
+    /// Trimmed, with character references decoded.
+    ///
+    /// Applied to titles and bylines only. Article content is real markup and
+    /// decoding its entities would corrupt it.
+    var asPlainText: String {
+        HTMLEntities.decode(trimmingCharacters(in: .whitespacesAndNewlines))
+    }
 
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)

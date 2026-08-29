@@ -29,7 +29,7 @@ enum RDFFeedParser {
 
         return ParsedFeed(
             format: .rdf,
-            title: delegate.channelTitle.trimmed,
+            title: HTMLEntities.decode(delegate.channelTitle.trimmed),
             homePageURL: URL(string: delegate.channelLink.trimmed),
             items: delegate.items.map(\.parsed)
         )
@@ -55,8 +55,8 @@ enum RDFFeedParser {
                 let guid = about.trimmed.isEmpty ? (link.trimmed.isEmpty ? title.trimmed : link.trimmed) : about.trimmed
                 return ParsedFeedItem(
                     guid: guid,
-                    title: title.trimmed,
-                    author: creator.trimmed.nilIfEmpty,
+                    title: HTMLEntities.decode(title.trimmed),
+                    author: creator.trimmed.nilIfEmpty.map(HTMLEntities.decode),
                     url: url,
                     contentHTML: description.trimmed.nilIfEmpty,
                     publishedAt: W3CDateFormatter.date(from: date.trimmed)

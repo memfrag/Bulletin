@@ -29,6 +29,10 @@ import KeyValueStore
         case readerLineWidth
         case readerUsesSerif
 
+        // MARK: Refreshing
+
+        case staleRefreshHours
+
         // MARK: Storage
 
         case bodyRetentionDays
@@ -68,6 +72,34 @@ import KeyValueStore
         }
     }
 
+    // MARK: Refreshing
+
+    /// How stale the feeds may be before activating the app refreshes them.
+    ///
+    /// There is no polling timer — macOS gives a quit app no background refresh
+    /// anyway — so coming back to the app is the moment worth checking. A value
+    /// of `0` refreshes on every activation; ``neverRefreshOnActivation``
+    /// disables it entirely.
+    public var staleRefreshHours: Int {
+        didSet {
+            store.save(staleRefreshHours, for: .staleRefreshHours)
+        }
+    }
+
+    /// The value of ``staleRefreshHours`` that means "only when I ask".
+    public static let neverRefreshOnActivation = -1
+
+    /// Whether activating the app should refresh feeds this old.
+    public func shouldRefresh(lastAttempt: Date?, now: Date = Date()) -> Bool {
+        guard staleRefreshHours != Self.neverRefreshOnActivation else { return false }
+
+        // Nothing fetched yet this session is as stale as it gets.
+        guard let lastAttempt else { return true }
+
+        let elapsed = now.timeIntervalSince(lastAttempt)
+        return elapsed >= TimeInterval(staleRefreshHours) * 3600
+    }
+
     // MARK: Storage
 
     /// How long an extracted article body is kept before being evicted.
@@ -97,6 +129,7 @@ import KeyValueStore
         readerFontSize = self.store.load(.readerFontSize, default: 17)
         readerLineWidth = self.store.load(.readerLineWidth, default: 680)
         readerUsesSerif = self.store.load(.readerUsesSerif, default: false)
+        staleRefreshHours = self.store.load(.staleRefreshHours, default: 8)
         bodyRetentionDays = self.store.load(.bodyRetentionDays, default: 30)
     }
 }

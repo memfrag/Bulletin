@@ -173,6 +173,14 @@ private struct KeyboardHelp: View {
                 does not mark it. Articles you read stay in the list until you leave the stream and \
                 come back.
                 """)
+
+            HelpSubheading("Refreshing")
+
+            HelpParagraph("""
+                Bulletin never polls in the background. Feeds are fetched when you launch it, when \
+                you come back to it after the interval set in Settings, and whenever you ask. A feed \
+                that keeps failing is retried less often; \u{2318}R always tries it anyway.
+                """)
         }
     }
 }

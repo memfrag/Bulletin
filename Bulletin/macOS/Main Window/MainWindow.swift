@@ -62,6 +62,15 @@ private struct MainWindowContent: View {
                     library?.flushPendingWrites()
                 }
             }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: NSApplication.didBecomeActiveNotification
+                )
+            ) { _ in
+                // Coming back to the app is the only moment an automatic fetch
+                // is clearly wanted; there is no polling timer to lean on.
+                Task { await library.refreshIfStale(olderThan: settings) }
+            }
             .task {
                 // Evict bodies past the retention window. Metadata is never
                 // pruned, so search and streams stay complete either way.

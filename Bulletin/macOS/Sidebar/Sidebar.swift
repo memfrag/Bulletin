@@ -28,6 +28,11 @@ struct Sidebar: View {
     @Query(filter: #Predicate<Feed> { $0.folder == nil }, sort: \Feed.title)
     private var rootFeeds: [Feed]
 
+    private var deletionTitle: String {
+        guard let feed = library.feedPendingDeletion else { return "" }
+        return String(localized: "Delete \(feed.displayTitle)?")
+    }
+
     var body: some View {
         @Bindable var library = library
         let counts = UnreadCounts(unreadArticles: unreadArticles)
@@ -79,7 +84,7 @@ struct Sidebar: View {
                 }
             }
             .listStyle(.sidebar)
-            .frame(minWidth: 200, idealWidth: 240, maxWidth: 340)
+            .frame(minWidth: 200, idealWidth: 240, maxWidth: .infinity)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SidebarFooter()
             }
@@ -99,6 +104,34 @@ struct Sidebar: View {
         }
         .sheet(isPresented: $library.isPresentingStreamEditor) {
             StreamEditorSheet(stream: library.editingStream)
+        }
+        .confirmationDialog(
+            deletionTitle,
+            isPresented: Binding(
+                get: { library.feedPendingDeletion != nil },
+                set: { if !$0 { library.feedPendingDeletion = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: library.feedPendingDeletion
+        ) { feed in
+            Button(role: .destructive) {
+                library.unsubscribe(feed)
+                library.feedPendingDeletion = nil
+            } label: {
+                Text("Delete", comment: "Confirm unsubscribing")
+            }
+            Button(role: .cancel) {
+                library.feedPendingDeletion = nil
+            } label: {
+                Text("Cancel", comment: "Dismiss the confirmation")
+            }
+        } message: { feed in
+            // Say what is actually lost. "Are you sure?" tells nobody anything,
+            // and starred articles going with the feed is the part that stings.
+            Text(
+                "Its \(feed.articles?.count ?? 0) articles will be deleted too, including any you have starred. This cannot be undone.",
+                comment: "Feed deletion confirmation detail"
+            )
         }
         .opmlFileImporter(isPresented: $library.isPresentingOPMLImporter)
         .opmlFileExporter(isPresented: $library.isPresentingOPMLExporter)
@@ -137,6 +170,8 @@ private struct FolderRow: View {
 
 private struct FeedRow: View {
 
+    @Environment(Library.self) private var library
+
     let feed: Feed
     let unreadCount: Int
 
@@ -157,6 +192,20 @@ private struct FeedRow: View {
             }
             .badge(unreadCount)
             .help(feed.lastFailureMessage ?? feed.displayTitle)
+        }
+        .contextMenu {
+            if let url = feed.homePageURL {
+                Link(destination: url) {
+                    Text("Open Website", comment: "Feed action")
+                }
+                Divider()
+            }
+
+            Button(role: .destructive) {
+                library.feedPendingDeletion = feed
+            } label: {
+                Text("Delete", comment: "Unsubscribe from a feed")
+            }
         }
     }
 }

@@ -49,7 +49,8 @@ struct BulletinCommands: Commands {
 
             Button {
                 guard let library else { return }
-                Task { await library.refreshAll() }
+                // Asking explicitly overrides a failing feed's backoff window.
+                Task { await library.refreshAll(force: true) }
             } label: {
                 Text("Refresh All Feeds", comment: "Fetch every subscribed feed now")
             }

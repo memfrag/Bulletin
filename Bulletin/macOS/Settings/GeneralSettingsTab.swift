@@ -22,6 +22,26 @@ struct GeneralSettingsTab: View {
             .pickerStyle(.segmented)
 
             Section {
+                Picker(selection: $settings.staleRefreshHours) {
+                    Text("Every time", comment: "Refresh-on-activation option").tag(0)
+                    Text("After 1 hour", comment: "Refresh-on-activation option").tag(1)
+                    Text("After 4 hours", comment: "Refresh-on-activation option").tag(4)
+                    Text("After 8 hours", comment: "Refresh-on-activation option").tag(8)
+                    Text("After 24 hours", comment: "Refresh-on-activation option").tag(24)
+                    Text("Never", comment: "Refresh-on-activation option")
+                        .tag(AppSettings.neverRefreshOnActivation)
+                } label: {
+                    Text("Refresh when returning to Bulletin:", comment: "Settings label")
+                }
+
+                Text("Bulletin never polls in the background. Feeds are fetched when you come back to the app after this long, and whenever you ask with \u{2318}R.",
+                     comment: "Explanation of the refresh setting")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Section {
                 Picker(selection: $settings.bodyRetentionDays) {
                     Text("7 days", comment: "Retention option").tag(7)
                     Text("30 days", comment: "Retention option").tag(30)
