@@ -58,6 +58,47 @@ struct OPMLTests {
         #expect(reread == original)
     }
 
+    // MARK: - Leaving another reader
+
+    @Test("A Feedly export imports with its categories intact")
+    func readsFeedlyExport() throws {
+        // Moving in from Feedly is the likeliest way anyone arrives here, and
+        // its export is the only file format that carries the whole
+        // subscription list. Feedly writes OPML 1.0, puts both `text` and
+        // `title` on every outline, and nests categories as parent outlines.
+        let document = try OPMLReader.read(try Fixture.data("feedly-export.opml"))
+
+        #expect(document.title == "Martin's Feedly Feeds")
+        #expect(document.feeds.count == 5)
+    }
+
+    @Test("Feedly categories become folders, nesting and all")
+    func mapsFeedlyCategories() throws {
+        let document = try OPMLReader.read(try Fixture.data("feedly-export.opml"))
+        let feeds = document.feeds
+
+        let fireball = try #require(feeds.first { $0.outline.text == "Daring Fireball" })
+        #expect(fireball.path == ["Design"])
+
+        let sundell = try #require(feeds.first { $0.outline.text == "Swift by Sundell" })
+        #expect(sundell.path == ["Dev", "Swift"])
+
+        // A feed in no category has to land at the top level rather than being
+        // dropped for having no folder to go in.
+        let uncategorised = try #require(feeds.first { $0.outline.text == "Uncategorised Blog" })
+        #expect(uncategorised.path.isEmpty)
+    }
+
+    @Test("A Feedly export can be exported straight back out")
+    func feedlyExportRoundTrips() throws {
+        let document = try OPMLReader.read(try Fixture.data("feedly-export.opml"))
+
+        let reread = try OPMLReader.read(Data(OPMLWriter.write(document).utf8))
+
+        // Arriving from Feedly must not be a one-way door.
+        #expect(reread == document)
+    }
+
     @Test("Ampersands in titles and URLs survive the round trip")
     func escapesCorrectly() throws {
         let document = OPMLDocument(

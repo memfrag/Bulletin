@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>Martin&apos;s Feedly Feeds</title>
+    </head>
+    <body>
+        <outline text="Design" title="Design">
+            <outline type="rss" text="Daring Fireball" title="Daring Fireball" xmlUrl="https://daringfireball.net/feeds/main" htmlUrl="https://daringfireball.net/"/>
+            <outline type="rss" text="SwiftLee &amp;raquo; Feed" title="SwiftLee &amp;raquo; Feed" xmlUrl="https://www.avanderlee.com/feed/" htmlUrl="https://www.avanderlee.com"/>
+        </outline>
+        <outline text="Dev" title="Dev">
+            <outline text="Swift" title="Swift">
+                <outline type="rss" text="Swift by Sundell" title="Swift by Sundell" xmlUrl="https://swiftbysundell.com/rss" htmlUrl="https://swiftbysundell.com"/>
+            </outline>
+            <outline type="rss" text="Nil Coalescing" title="Nil Coalescing" xmlUrl="https://nilcoalescing.com/rss.xml" htmlUrl="https://nilcoalescing.com"/>
+        </outline>
+        <outline type="rss" text="Uncategorised Blog" title="Uncategorised Blog" xmlUrl="https://example.com/feed.xml" htmlUrl="https://example.com"/>
+    </body>
+</opml>
