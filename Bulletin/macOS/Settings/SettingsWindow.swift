@@ -10,6 +10,7 @@ struct SettingsWindow: Scene {
     private enum Tabs: Hashable {
         case general
         case reading
+        case feeds
     }
 
     var body: some Scene {
@@ -32,7 +33,15 @@ struct SettingsWindow: Scene {
                     Label("Reading", systemImage: "text.alignleft")
                 }
                 .tag(Tabs.reading)
+
+            FeedHealthSettingsTab()
+                .tabItem {
+                    Label("Feeds", systemImage: "antenna.radiowaves.left.and.right")
+                }
+                .tag(Tabs.feeds)
         }
-        .frame(width: 460, height: 380)
+        // Wide enough for the health table's three columns; the other tabs are
+        // comfortable at this size too.
+        .frame(width: 620, height: 440)
     }    
 }

@@ -13,8 +13,6 @@ struct BulletinCommands: Commands {
 
     @FocusedValue(\.library) private var library
 
-    @Environment(\.openWindow) private var openWindow
-
     var body: some Commands {
 
         CommandGroup(replacing: .newItem) {
@@ -56,12 +54,6 @@ struct BulletinCommands: Commands {
             }
             .keyboardShortcut("r", modifiers: [.command])
             .disabled(library == nil || library?.isRefreshing == true)
-
-            Button {
-                openWindow(id: FeedHealthWindow.windowID)
-            } label: {
-                Text("Feed Health…", comment: "Opens the feed health window")
-            }
 
             Button {
                 // A new stream starts from whatever is in the search field,

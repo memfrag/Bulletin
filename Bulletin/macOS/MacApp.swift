@@ -39,6 +39,5 @@ struct MacApp: App {
             ("Readability", .apache2(year: "2010", holder: "Arc90 Inc"))
         ], header: "The following software may be included in this product.")
         HelpWindow()
-        FeedHealthWindow()
     }
 }

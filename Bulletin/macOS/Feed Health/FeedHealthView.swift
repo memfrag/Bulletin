@@ -38,6 +38,9 @@ struct FeedHealthView: View {
                                 .lineLimit(1)
                         }
                     }
+                    // The name is what you scan for, so it gets the room. Most
+                    // feeds are healthy and their Problem cell is a dash.
+                    .width(min: 160, ideal: 240)
 
                     TableColumn(Text("Last Checked", comment: "Feed health column")) { feed in
                         if let lastFetchedAt = feed.lastFetchedAt {
@@ -48,7 +51,7 @@ struct FeedHealthView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    .width(min: 100, ideal: 120)
+                    .width(min: 90, ideal: 110)
 
                     TableColumn(Text("Problem", comment: "Feed health column")) { feed in
                         if let message = feed.lastFailureMessage {
@@ -61,12 +64,10 @@ struct FeedHealthView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-                    .width(min: 160, ideal: 260)
+                    .width(min: 120, ideal: 180)
                 }
             }
         }
-        .frame(minWidth: 520, minHeight: 320)
-        .navigationTitle(Text("Feed Health", comment: "Feed health window title"))
     }
 
     @ViewBuilder
